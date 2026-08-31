@@ -7,22 +7,43 @@ try {
     // Ignore DNS override errors in restricted environments
 }
 
-let isConnected = false;
-
+let cachedConn = null;
+let cachedPromise = null;
 
 const dbConnection = async () => {
-    if (isConnected || mongoose.connection.readyState >= 1) {
-        return;
+    if (cachedConn && mongoose.connection.readyState === 1) {
+        return cachedConn;
+    }
+
+    if (!cachedPromise) {
+        const uri = process.env.MONGO_URI;
+        if (!uri) {
+            console.error('❌ MONGO_URI is missing in environment variables!');
+            throw new Error('MONGO_URI is missing in environment variables');
+        }
+
+        const opts = {
+            serverSelectionTimeoutMS: 8000,
+        };
+
+        cachedPromise = mongoose.connect(uri, opts).then((mongooseInstance) => {
+            console.log(`✅ MongoDB Connected: ${mongooseInstance.connection.host}`);
+            return mongooseInstance;
+        }).catch((err) => {
+            console.error('❌ MongoDB Connection Error:', err.message);
+            cachedPromise = null;
+            throw err;
+        });
     }
 
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URI);
-        isConnected = true;
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
-    } catch (error) {
-        console.error(`MongoDB Connection Error: ${error.message}`);
+        cachedConn = await cachedPromise;
+    } catch (e) {
+        cachedPromise = null;
+        throw e;
     }
+
+    return cachedConn;
 };
 
 module.exports = dbConnection;
-

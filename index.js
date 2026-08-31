@@ -18,9 +18,25 @@ const applicationRoutes = require('./routes/applicationRoutes');
 
 const compression = require('compression');
 
-dbConnection();
-
 const app = express();
+
+// Ensure Database connection is established before serving requests (Crucial for Vercel Serverless)
+app.use(async (req, res, next) => {
+    // Skip db connection for health check
+    if (req.path === '/' || req.path === '/api/health') {
+        return next();
+    }
+    try {
+        await dbConnection();
+        next();
+    } catch (err) {
+        console.error('DB Connection Middleware Error:', err.message);
+        res.status(500).json({
+            success: false,
+            message: 'Database connection failed: ' + err.message,
+        });
+    }
+});
 
 // High-performance gzip response compression
 app.use(compression({
