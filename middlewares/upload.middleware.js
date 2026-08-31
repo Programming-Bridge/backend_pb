@@ -45,23 +45,15 @@ const bannerStorage = new CloudinaryStorage({
     },
 });
 
-const fs = require('fs');
-const path = require('path');
-
-// Ensure uploads/resumes directory exists
-const resumeDir = path.join(__dirname, '../uploads/resumes');
-if (!fs.existsSync(resumeDir)) {
-    fs.mkdirSync(resumeDir, { recursive: true });
-}
-
-const resumeStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, resumeDir);
-    },
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname);
-        const name = sanitizeFilename(file.originalname);
-        cb(null, `${name}${ext}`);
+// Storage setup for Resumes (Cloudinary)
+const resumeStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+        return {
+            folder: 'programming_bridge/resumes',
+            resource_type: 'auto',
+            public_id: sanitizeFilename(file.originalname),
+        };
     },
 });
 

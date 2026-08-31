@@ -38,6 +38,15 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
     etag: true,
 }));
 
+// Root Health Check Route
+app.get('/', (req, res) => {
+    res.json({
+        success: true,
+        message: 'Programming Bridge Backend API is running successfully on Vercel!',
+        timestamp: new Date().toISOString(),
+    });
+});
+
 // Routes
 app.use('/api/navbar', navbarRoutes);
 app.use('/api/banner', bannerRoutes);
@@ -71,6 +80,13 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+
+// Listen locally or if not in serverless Vercel environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+
+module.exports = app;
+

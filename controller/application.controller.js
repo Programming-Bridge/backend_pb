@@ -107,9 +107,12 @@ exports.submitApplication = async (req, res) => {
         }
 
         let resolvedResumeUrl = (resumeUrl || '').trim();
-        if (uploadedFile?.filename) {
+        if (uploadedFile?.path) {
+            resolvedResumeUrl = uploadedFile.path;
+        } else if (uploadedFile?.filename) {
             resolvedResumeUrl = `/uploads/resumes/${uploadedFile.filename}`;
         }
+
 
         const newApplication = new Application({
             fullName: candidateName,
