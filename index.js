@@ -15,6 +15,7 @@ const techStackRoutes = require('./routes/techStackRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const careerRoutes = require('./routes/careerRoutes');
 const applicationRoutes = require('./routes/applicationRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const compression = require('compression');
 
@@ -81,6 +82,7 @@ app.use('/api/careers', careerRoutes);
 app.use('/api/jobs', careerRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/apply', applicationRoutes);
+app.use('/api/auth', authRoutes);
 
 
 app.use((req, res) => {
