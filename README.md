@@ -158,6 +158,14 @@ This API serves the **Programming Bridge Frontend Application**:
 
 ---
 
+## 📋 Changelog
+
+### v0.2.1 — Input Validation & Phone Sanitization
+- **Phone Number Validation**: Enhanced express-validator rules for inquiry and job applications to support international phone characters (`+`, digits, hyphens, spaces, parens) with minimum character requirements.
+- **Inquiry Payload Sanitization**: Added support for flexible budget ranges and project types.
+
+---
+
 ## 📄 License & Ownership
 
 © 2026 **Programming Bridge Agency**. All Rights Reserved.  

@@ -39,8 +39,10 @@ const createInquiryRules = [
         .isLength({ min: 5, max: 5000 }).withMessage('Message must be between 5 and 5000 characters'),
 
     body('phone')
-        .optional()
-        .trim(),
+        .optional({ checkFalsy: true })
+        .trim()
+        .matches(/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\./0-9]{6,16}$/)
+        .withMessage('Please provide a valid phone number containing digits and valid phone symbols only'),
 
     body('company')
         .optional()
