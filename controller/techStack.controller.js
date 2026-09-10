@@ -192,7 +192,7 @@ const defaultTechItems = [
     {
         id: "xgboost",
         name: "XGBoost",
-        svgUrl: "https://raw.githubusercontent.com/dmlc/dmlc.github.io/master/img/logo-m/xgboost.png",
+        svgUrl: "/icons/xgboost.svg",
         domain: "ai-ml",
         category: "Classical ML",
         categoryLabel: "Gradient Boosting",
@@ -252,7 +252,7 @@ const defaultTechItems = [
     {
         id: "openai",
         name: "OpenAI / LLMs",
-        svgUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/openai/openai-original.svg",
+        svgUrl: "/icons/openai.svg",
         domain: "ai-ml",
         category: "NLP & GenAI",
         categoryLabel: "Generative AI",
@@ -386,6 +386,18 @@ const defaultTechItems = [
     },
 ];
 
+// Helper: Sanitize broken/remote legacy tech icon URLs to local SVG assets
+const sanitizeSvgUrl = (url, id) => {
+    if (!url) return url;
+    if (url.includes('openai-original.svg') || id === 'openai' || url.includes('openai/openai')) {
+        return '/icons/openai.svg';
+    }
+    if (url.includes('xgboost.png') || id === 'xgboost' || url.includes('dmlc.github.io')) {
+        return '/icons/xgboost.svg';
+    }
+    return url;
+};
+
 // Helper: Ensure initial standard technologies exist in database
 const ensureInitialSeed = async () => {
     try {
@@ -393,6 +405,16 @@ const ensureInitialSeed = async () => {
         if (count === 0) {
             await TechStack.insertMany(defaultTechItems);
             console.log(`[TechStack] Auto-seeded ${defaultTechItems.length} technologies`);
+        } else {
+            // Self-healing migration for existing MongoDB database records with old/broken CDN URLs
+            await TechStack.updateMany(
+                { $or: [{ id: 'openai' }, { svgUrl: { $regex: 'openai-original|openai/openai', $options: 'i' } }] },
+                { $set: { svgUrl: '/icons/openai.svg' } }
+            );
+            await TechStack.updateMany(
+                { $or: [{ id: 'xgboost' }, { svgUrl: { $regex: 'xgboost\\.png|dmlc\\.github\\.io', $options: 'i' } }] },
+                { $set: { svgUrl: '/icons/xgboost.svg' } }
+            );
         }
     } catch (err) {
         console.error('[TechStack] Auto-seed failed:', err.message);
@@ -441,6 +463,7 @@ exports.getAllTechnologies = async (req, res) => {
         const mapped = items.map((t) => ({
             ...t,
             techId: t.id || t._id.toString(),
+            svgUrl: sanitizeSvgUrl(t.svgUrl, t.id),
         }));
 
         const responsePayload = {
@@ -467,11 +490,11 @@ exports.getTechnologyById = async (req, res) => {
         let item = null;
 
         if (id.match(/^[0-9a-fA-F]{24}$/)) {
-            item = await TechStack.findById(id);
+            item = await TechStack.findById(id).lean();
         }
 
         if (!item) {
-            item = await TechStack.findOne({ id });
+            item = await TechStack.findOne({ id }).lean();
         }
 
         if (!item) {
@@ -481,9 +504,14 @@ exports.getTechnologyById = async (req, res) => {
             });
         }
 
+        const sanitizedItem = {
+            ...item,
+            svgUrl: sanitizeSvgUrl(item.svgUrl, item.id),
+        };
+
         return res.status(200).json({
             success: true,
-            data: item,
+            data: sanitizedItem,
         });
     } catch (error) {
         return res.status(500).json({
