@@ -16,11 +16,15 @@ const {
 } = require('../validations/serviceCard.validation');
 
 const validate = require('../middlewares/validate.middleware');
+const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
+// Public routes
 serviceCardRoutes.get('/', getAllServiceCards);
-serviceCardRoutes.post('/add', createServiceCardRules, validate, createServiceCard);
-serviceCardRoutes.post('/bulk-add', createBulkServiceCards);
-serviceCardRoutes.put('/update/:id', [...serviceCardIdParamRules, ...updateServiceCardRules], validate, updateServiceCard);
-serviceCardRoutes.delete('/delete/:id', serviceCardIdParamRules, validate, deleteServiceCard);
+
+// Protected Mutation Routes (Admin Only)
+serviceCardRoutes.post('/add', verifyToken, isAdmin, createServiceCardRules, validate, createServiceCard);
+serviceCardRoutes.post('/bulk-add', verifyToken, isAdmin, createBulkServiceCards);
+serviceCardRoutes.put('/update/:id', verifyToken, isAdmin, [...serviceCardIdParamRules, ...updateServiceCardRules], validate, updateServiceCard);
+serviceCardRoutes.delete('/delete/:id', verifyToken, isAdmin, serviceCardIdParamRules, validate, deleteServiceCard);
 
 module.exports = serviceCardRoutes;

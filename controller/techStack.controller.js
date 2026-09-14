@@ -432,10 +432,10 @@ exports.getAllTechnologies = async (req, res) => {
 
         await ensureInitialSeed();
 
-        const { domain, category, search, activeOnly = 'true' } = req.query;
+        const { domain, category, search, activeOnly, all, includeInactive } = req.query;
         const filter = {};
 
-        if (activeOnly === 'true') {
+        if (all !== 'true' && includeInactive !== 'true' && activeOnly !== 'false') {
             filter.isActive = { $ne: false };
         }
 

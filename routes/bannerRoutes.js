@@ -15,15 +15,18 @@ const {
 } = require('../validations/banner.validation');
 const { uploadBanner } = require('../middlewares/upload.middleware');
 const validate = require('../middlewares/validate.middleware');
+const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
-// Routes
+// Public Routes
 bannerRoutes.get('/', getAllBanners);
 bannerRoutes.get('/page/:pageType', pageTypeParamRules, validate, getBannerByPageType);
-bannerRoutes.post('/add-banner', uploadBanner.any(), createBannerRules, validate, createBanner);
-bannerRoutes.post('/', uploadBanner.any(), createBannerRules, validate, createBanner);
-bannerRoutes.put('/update-banner/:id', uploadBanner.any(), [...bannerIdParamRules, ...updateBannerRules], validate, updateBanner);
-bannerRoutes.put('/:id', uploadBanner.any(), [...bannerIdParamRules, ...updateBannerRules], validate, updateBanner);
-bannerRoutes.delete('/delete-banner/:id', bannerIdParamRules, validate, deleteBanner);
-bannerRoutes.delete('/:id', bannerIdParamRules, validate, deleteBanner);
+
+// Protected Mutation Routes (Admin Only)
+bannerRoutes.post('/add-banner', verifyToken, isAdmin, uploadBanner.any(), createBannerRules, validate, createBanner);
+bannerRoutes.post('/', verifyToken, isAdmin, uploadBanner.any(), createBannerRules, validate, createBanner);
+bannerRoutes.put('/update-banner/:id', verifyToken, isAdmin, uploadBanner.any(), [...bannerIdParamRules, ...updateBannerRules], validate, updateBanner);
+bannerRoutes.put('/:id', verifyToken, isAdmin, uploadBanner.any(), [...bannerIdParamRules, ...updateBannerRules], validate, updateBanner);
+bannerRoutes.delete('/delete-banner/:id', verifyToken, isAdmin, bannerIdParamRules, validate, deleteBanner);
+bannerRoutes.delete('/:id', verifyToken, isAdmin, bannerIdParamRules, validate, deleteBanner);
 
 module.exports = bannerRoutes;
