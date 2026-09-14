@@ -11,25 +11,21 @@ const {
     seedCareers,
 } = require('../controller/career.controller');
 
-// GET all career openings (supports ?department=...&type=...&search=...)
+const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+
+// GET all career openings (supports ?department=...&type=...&search=...) (Public)
 careerRoutes.get('/', getAllCareers);
 
-// POST seed career openings
-careerRoutes.post('/seed', seedCareers);
-
-// GET career opening by slug
+// GET career opening by slug (Public)
 careerRoutes.get('/slug/:slug', getCareerBySlug);
 
-// GET single career opening by ID
+// GET single career opening by ID (Public)
 careerRoutes.get('/:id', getCareerById);
 
-// POST create career opening
-careerRoutes.post('/', createCareer);
-
-// PUT update career opening
-careerRoutes.put('/:id', updateCareer);
-
-// DELETE career opening
-careerRoutes.delete('/:id', deleteCareer);
+// Protected Mutation Routes (Admin Only)
+careerRoutes.post('/seed', verifyToken, isAdmin, seedCareers);
+careerRoutes.post('/', verifyToken, isAdmin, createCareer);
+careerRoutes.put('/:id', verifyToken, isAdmin, updateCareer);
+careerRoutes.delete('/:id', verifyToken, isAdmin, deleteCareer);
 
 module.exports = careerRoutes;

@@ -11,18 +11,20 @@ const {
     seedTechnologies,
 } = require('../controller/techStack.controller');
 
+const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+
 // Public endpoints
 techStackRoutes.get('/', getAllTechnologies);
 techStackRoutes.get('/:id', getTechnologyById);
 
-// Mutation endpoints
-techStackRoutes.post('/', createTechnology);
-techStackRoutes.post('/add', createTechnology);
-techStackRoutes.post('/bulk', bulkAddTechnologies);
-techStackRoutes.post('/seed', seedTechnologies);
+// Protected Mutation endpoints (Admin Only)
+techStackRoutes.post('/', verifyToken, isAdmin, createTechnology);
+techStackRoutes.post('/add', verifyToken, isAdmin, createTechnology);
+techStackRoutes.post('/bulk', verifyToken, isAdmin, bulkAddTechnologies);
+techStackRoutes.post('/seed', verifyToken, isAdmin, seedTechnologies);
 
-techStackRoutes.put('/:id', updateTechnology);
-techStackRoutes.patch('/:id', updateTechnology);
-techStackRoutes.delete('/:id', deleteTechnology);
+techStackRoutes.put('/:id', verifyToken, isAdmin, updateTechnology);
+techStackRoutes.patch('/:id', verifyToken, isAdmin, updateTechnology);
+techStackRoutes.delete('/:id', verifyToken, isAdmin, deleteTechnology);
 
 module.exports = techStackRoutes;

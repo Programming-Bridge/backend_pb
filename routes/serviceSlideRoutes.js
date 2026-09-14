@@ -15,10 +15,14 @@ const {
 } = require('../validations/serviceSlide.validation');
 
 const validate = require('../middlewares/validate.middleware');
+const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
+// Public routes
 serviceSlideRoutes.get('/', getAllSlides);
-serviceSlideRoutes.post('/add', createSlideRules, validate, createSlide);
-serviceSlideRoutes.put('/update/:id', [...slideIdParamRules, ...updateSlideRules], validate, updateSlide);
-serviceSlideRoutes.delete('/delete/:id', slideIdParamRules, validate, deleteSlide);
+
+// Protected Mutation Routes (Admin Only)
+serviceSlideRoutes.post('/add', verifyToken, isAdmin, createSlideRules, validate, createSlide);
+serviceSlideRoutes.put('/update/:id', verifyToken, isAdmin, [...slideIdParamRules, ...updateSlideRules], validate, updateSlide);
+serviceSlideRoutes.delete('/delete/:id', verifyToken, isAdmin, slideIdParamRules, validate, deleteSlide);
 
 module.exports = serviceSlideRoutes;

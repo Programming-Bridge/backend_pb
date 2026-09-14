@@ -9,6 +9,7 @@ const {
     createBulkProjects,
     updateProject,
     deleteProject,
+    seedProjects,
 } = require('../controller/project.controller');
 
 const {
@@ -20,19 +21,25 @@ const {
 
 const { uploadProject } = require('../middlewares/upload.middleware');
 const validate = require('../middlewares/validate.middleware');
+const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
-// GET all projects (with filtering)
+// GET all projects (Public with filtering)
 projectRoutes.get('/', getAllProjects);
 
-// GET project by Slug (placed before :id route so slug doesn't conflict)
+// GET project by Slug (Public)
 projectRoutes.get('/slug/:slug', projectSlugParamRules, validate, getProjectBySlug);
 
-// GET single project by Mongo ID
+// GET single project by Mongo ID (Public)
 projectRoutes.get('/:id', projectIdParamRules, validate, getProjectById);
 
-// POST create single project (supports image, img, file, etc.)
+// POST seed / reset projects (Protected: Admin Only)
+projectRoutes.post('/seed', verifyToken, isAdmin, seedProjects);
+
+// POST create single project (Protected: Admin Only)
 projectRoutes.post(
     '/add',
+    verifyToken,
+    isAdmin,
     uploadProject.any(),
     createProjectRules,
     validate,
@@ -40,18 +47,22 @@ projectRoutes.post(
 );
 projectRoutes.post(
     '/',
+    verifyToken,
+    isAdmin,
     uploadProject.any(),
     createProjectRules,
     validate,
     createProject
 );
 
-// POST bulk create projects (JSON array)
-projectRoutes.post('/bulk-add', createBulkProjects);
+// POST bulk create projects (Protected: Admin Only)
+projectRoutes.post('/bulk-add', verifyToken, isAdmin, createBulkProjects);
 
-// PUT update project by ID (with optional image file upload)
+// PUT update project by ID (Protected: Admin Only)
 projectRoutes.put(
     '/update/:id',
+    verifyToken,
+    isAdmin,
     uploadProject.any(),
     [...projectIdParamRules, ...updateProjectRules],
     validate,
@@ -59,21 +70,27 @@ projectRoutes.put(
 );
 projectRoutes.put(
     '/:id',
+    verifyToken,
+    isAdmin,
     uploadProject.any(),
     [...projectIdParamRules, ...updateProjectRules],
     validate,
     updateProject
 );
 
-// DELETE project by ID
+// DELETE project by ID (Protected: Admin Only)
 projectRoutes.delete(
     '/delete/:id',
+    verifyToken,
+    isAdmin,
     projectIdParamRules,
     validate,
     deleteProject
 );
 projectRoutes.delete(
     '/:id',
+    verifyToken,
+    isAdmin,
     projectIdParamRules,
     validate,
     deleteProject

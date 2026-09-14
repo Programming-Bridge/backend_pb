@@ -15,9 +15,11 @@ const {
     inquiryIdParamRules,
 } = require('../validations/inquiry.validation');
 
+const { uploadResume } = require('../middlewares/upload.middleware');
 const validate = require('../middlewares/validate.middleware');
+const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
-// POST submit new inquiry / contact message
+// POST submit new inquiry / contact message (Public)
 inquiryRoutes.post(
     '/send',
     createInquiryRules,
@@ -32,15 +34,17 @@ inquiryRoutes.post(
     createInquiry
 );
 
-// GET all inquiries (with search, status filter, pagination)
-inquiryRoutes.get('/', getAllInquiries);
+// GET all inquiries (Protected: Admin Only)
+inquiryRoutes.get('/', verifyToken, isAdmin, getAllInquiries);
 
-// GET single inquiry by ID
-inquiryRoutes.get('/:id', inquiryIdParamRules, validate, getInquiryById);
+// GET single inquiry by ID (Protected: Admin Only)
+inquiryRoutes.get('/:id', verifyToken, isAdmin, inquiryIdParamRules, validate, getInquiryById);
 
-// PATCH / PUT update inquiry status (e.g. In Review, Contacted, Closed)
+// PATCH / PUT update inquiry status (Protected: Admin Only)
 inquiryRoutes.patch(
     '/:id/status',
+    verifyToken,
+    isAdmin,
     [...inquiryIdParamRules, ...updateInquiryStatusRules],
     validate,
     updateInquiryStatus
@@ -48,12 +52,14 @@ inquiryRoutes.patch(
 
 inquiryRoutes.put(
     '/:id',
+    verifyToken,
+    isAdmin,
     [...inquiryIdParamRules, ...updateInquiryStatusRules],
     validate,
     updateInquiryStatus
 );
 
-// DELETE inquiry by ID
-inquiryRoutes.delete('/:id', inquiryIdParamRules, validate, deleteInquiry);
+// DELETE inquiry by ID (Protected: Admin Only)
+inquiryRoutes.delete('/:id', verifyToken, isAdmin, inquiryIdParamRules, validate, deleteInquiry);
 
 module.exports = inquiryRoutes;
