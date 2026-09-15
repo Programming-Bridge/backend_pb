@@ -67,6 +67,12 @@ const projectSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        status: {
+            type: String,
+            enum: ['Completed', 'In Progress', 'Upcoming'],
+            default: 'Completed',
+            trim: true,
+        },
         order: {
             type: Number,
             default: 0,
@@ -87,6 +93,7 @@ const projectSchema = new mongoose.Schema(
 projectSchema.index({ isActive: 1, order: 1 });
 projectSchema.index({ category: 1, isActive: 1 });
 projectSchema.index({ featured: 1, isActive: 1 });
+projectSchema.index({ status: 1, isActive: 1 });
 projectSchema.index({ slug: 1 });
 
 // Virtual aliases for ease of use

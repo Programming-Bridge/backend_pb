@@ -66,6 +66,11 @@ const createProjectRules = [
     body('featured')
         .optional(),
 
+    body('status')
+        .optional()
+        .isString().withMessage('Status must be a string')
+        .trim(),
+
     body('order')
         .optional(),
 
@@ -140,6 +145,11 @@ const updateProjectRules = [
 
     body('featured')
         .optional(),
+
+    body('status')
+        .optional()
+        .isString().withMessage('Status must be a string')
+        .trim(),
 
     body('order')
         .optional(),
