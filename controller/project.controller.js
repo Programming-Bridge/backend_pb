@@ -73,6 +73,10 @@ const parseProjectBody = (body, req) => {
         data.order = Number(data.order) || 0;
     }
 
+    if (data.status) {
+        data.status = String(data.status).trim();
+    }
+
     return data;
 };
 
@@ -146,6 +150,7 @@ const defaultProjects = [
         liveLink: "https://play.google.com/store/apps/details?id=com.app.enaam",
         gitLink: "https://github.com/Programming-Bridge/enaam-prize-competition-app",
         featured: true,
+        status: "Completed",
         order: 1,
         isActive: true,
     },
@@ -164,6 +169,7 @@ const defaultProjects = [
         liveLink: "https://play.google.com/store/apps/details?id=com.runningtribe",
         gitLink: "https://github.com/Programming-Bridge/running-tribe-mobile-app",
         featured: true,
+        status: "Completed",
         order: 2,
         isActive: true,
     },
@@ -182,6 +188,7 @@ const defaultProjects = [
         liveLink: "https://play.google.com/store/apps/details?id=com.fitnessfreak",
         gitLink: "https://github.com/Programming-Bridge/fitness-freak-workout-app",
         featured: true,
+        status: "Completed",
         order: 3,
         isActive: true,
     },
@@ -200,6 +207,7 @@ const defaultProjects = [
         liveLink: "https://ecommerce.programmingbridge.com",
         gitLink: "https://github.com/Programming-Bridge/ecommerce-microservices-engine",
         featured: true,
+        status: "Completed",
         order: 4,
         isActive: true,
     },
@@ -218,6 +226,7 @@ const defaultProjects = [
         liveLink: "https://telehealth.programmingbridge.com",
         gitLink: "https://github.com/Programming-Bridge/telehealth-mobile-suite",
         featured: true,
+        status: "Completed",
         order: 5,
         isActive: true,
     },
@@ -236,6 +245,7 @@ const defaultProjects = [
         liveLink: "https://ai-copilot.programmingbridge.com",
         gitLink: "https://github.com/Programming-Bridge/enterprise-rag-copilot",
         featured: true,
+        status: "Completed",
         order: 6,
         isActive: true,
     },
@@ -254,6 +264,7 @@ const defaultProjects = [
         liveLink: "https://cloudops.programmingbridge.com",
         gitLink: "https://github.com/Programming-Bridge/multi-region-k8s-observability",
         featured: false,
+        status: "Completed",
         order: 7,
         isActive: true,
     },
@@ -272,6 +283,7 @@ const defaultProjects = [
         liveLink: "https://media-publisher.programmingbridge.com",
         gitLink: "https://github.com/Programming-Bridge/headless-wordpress-nextjs-publisher",
         featured: false,
+        status: "Completed",
         order: 8,
         isActive: true,
     },
@@ -290,6 +302,7 @@ const defaultProjects = [
         liveLink: "https://fintrack.programmingbridge.com",
         gitLink: "https://github.com/Programming-Bridge/fintrack-android-wealth-engine",
         featured: false,
+        status: "Completed",
         order: 9,
         isActive: true,
     },
@@ -308,6 +321,7 @@ const defaultProjects = [
         liveLink: "https://logistics.programmingbridge.com",
         gitLink: "https://github.com/Programming-Bridge/fleet-route-optimization-engine",
         featured: false,
+        status: "Completed",
         order: 10,
         isActive: true,
     },
@@ -347,7 +361,7 @@ exports.seedProjects = async (req, res) => {
     }
 };
 
-// Get all projects (supports filters: category, featured, search, all)
+// Get all projects (supports filters: category, featured, search, all, status)
 exports.getAllProjects = async (req, res) => {
     try {
         const cacheKey = `projects_${JSON.stringify(req.query)}`;
@@ -358,7 +372,7 @@ exports.getAllProjects = async (req, res) => {
 
         await ensureProjectsSeed();
 
-        const { category, featured, search, all } = req.query;
+        const { category, featured, search, all, status } = req.query;
         const filter = {};
 
         // By default, return active projects unless all=true is provided
@@ -369,6 +383,11 @@ exports.getAllProjects = async (req, res) => {
         // Filter by category
         if (category) {
             filter.category = new RegExp(category, 'i');
+        }
+
+        // Filter by status
+        if (status) {
+            filter.status = status;
         }
 
         // Filter by featured
