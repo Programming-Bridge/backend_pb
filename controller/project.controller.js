@@ -21,12 +21,12 @@ const parseProjectBody = (body, req) => {
     if (uploadedFile) {
         data.image = uploadedFile.path; // Cloudinary secure HTTPS URL
         data.cloudinaryPublicId = uploadedFile.filename; // Cloudinary public ID
-    } else if (data.img && !data.image) {
-        data.image = data.img;
-    } else if (data.imageUrl && !data.image) {
-        data.image = data.imageUrl;
-    } else if (data.projectImage && !data.image) {
-        data.image = data.projectImage;
+    } else if (data.img && typeof data.img === 'string' && data.img.trim()) {
+        data.image = data.img.trim();
+    } else if (data.imageUrl && typeof data.imageUrl === 'string' && data.imageUrl.trim()) {
+        data.image = data.imageUrl.trim();
+    } else if (data.projectImage && typeof data.projectImage === 'string' && data.projectImage.trim()) {
+        data.image = data.projectImage.trim();
     }
 
 
