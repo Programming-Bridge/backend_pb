@@ -1,5 +1,9 @@
 const Application = require('../model/application.model');
-const { sendMailFromZoho } = require('../utils/mailer.util');
+const {
+    sendMailFromZoho,
+    generateInterviewInvitationEmail,
+    generateRejectionEmail,
+} = require('../utils/mailer.util');
 
 // Send email notification to company official email
 const sendJobApplicationEmail = async (application, fileAttachment = null) => {
@@ -183,10 +187,10 @@ exports.getApplicationById = async (req, res) => {
     }
 };
 
-// 4. Update application status
+// 4. Update application status (with automatic rejection email when status becomes 'Rejected')
 exports.updateApplicationStatus = async (req, res) => {
     try {
-        const { status } = req.body;
+        const { status, sendEmail = true } = req.body;
         const application = await Application.findByIdAndUpdate(
             req.params.id,
             { status },
@@ -198,9 +202,29 @@ exports.updateApplicationStatus = async (req, res) => {
                 message: 'Application not found',
             });
         }
+
+        // Auto-send polite rejection email if status was updated to Rejected
+        if (status === 'Rejected' && sendEmail !== false && application.email) {
+            try {
+                const rejectionHtml = generateRejectionEmail({
+                    candidateName: application.fullName,
+                    roleApplied: application.roleApplied,
+                });
+                await sendMailFromZoho({
+                    to: application.email,
+                    subject: `Update regarding your application for ${application.roleApplied} - Programming Bridge`,
+                    html: rejectionHtml,
+                    isHR: true,
+                });
+                console.log(`Rejection email dispatched to ${application.email}`);
+            } catch (mailErr) {
+                console.error('Failed to send rejection email:', mailErr.message);
+            }
+        }
+
         return res.status(200).json({
             success: true,
-            message: 'Application status updated successfully',
+            message: `Application status updated to ${status}${status === 'Rejected' ? ' and rejection notice dispatched.' : ' successfully.'}`,
             data: application,
         });
     } catch (error) {
@@ -211,7 +235,111 @@ exports.updateApplicationStatus = async (req, res) => {
     }
 };
 
-// 5. Delete application
+// 5. Send Interview Invitation Email to Candidate
+exports.inviteToInterview = async (req, res) => {
+    try {
+        const {
+            interviewDate,
+            interviewTime,
+            interviewType = 'Google Meet',
+            interviewLink,
+            notes,
+            interviewerName = 'Talent Acquisition & Technical Panel',
+        } = req.body;
+
+        const application = await Application.findById(req.params.id);
+        if (!application) {
+            return res.status(404).json({
+                success: false,
+                message: 'Application not found',
+            });
+        }
+
+        if (!application.email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Candidate email address is missing.',
+            });
+        }
+
+        // Generate luxury HTML interview invitation
+        const html = generateInterviewInvitationEmail({
+            candidateName: application.fullName,
+            roleApplied: application.roleApplied,
+            interviewDate,
+            interviewTime,
+            interviewType,
+            interviewLink,
+            notes,
+            interviewerName,
+        });
+
+        // Send via Zoho SMTP with HR Persona
+        await sendMailFromZoho({
+            to: application.email,
+            subject: `🎯 Interview Invitation: ${application.roleApplied} at Programming Bridge`,
+            html,
+            isHR: true,
+        });
+
+        // Update application status to 'Interview Scheduled'
+        application.status = 'Interview Scheduled';
+        await application.save();
+
+        return res.status(200).json({
+            success: true,
+            message: `Interview invitation sent successfully to ${application.fullName} (${application.email})!`,
+            data: application,
+        });
+    } catch (error) {
+        console.error('Interview Invitation Error:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to send interview invitation',
+        });
+    }
+};
+
+// 6. Explicit Candidate Rejection Email
+exports.sendCandidateRejectionEmail = async (req, res) => {
+    try {
+        const application = await Application.findById(req.params.id);
+        if (!application) {
+            return res.status(404).json({
+                success: false,
+                message: 'Application not found',
+            });
+        }
+
+        const html = generateRejectionEmail({
+            candidateName: application.fullName,
+            roleApplied: application.roleApplied,
+        });
+
+        await sendMailFromZoho({
+            to: application.email,
+            subject: `Update regarding your application for ${application.roleApplied} - Programming Bridge`,
+            html,
+            isHR: true,
+        });
+
+        application.status = 'Rejected';
+        await application.save();
+
+        return res.status(200).json({
+            success: true,
+            message: `Rejection email sent successfully to ${application.fullName}.`,
+            data: application,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to send rejection email',
+        });
+    }
+};
+
+// 7. Delete application
 exports.deleteApplication = async (req, res) => {
     try {
         const application = await Application.findByIdAndDelete(req.params.id);

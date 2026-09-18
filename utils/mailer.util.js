@@ -424,18 +424,337 @@ const generateEmailTemplate = ({ subject, message, clientName = 'Valued Client' 
 };
 
 /**
+ * Generates an ultra-premium, dark/light adaptive HTML email template for candidate interview invitations
+ */
+const generateInterviewInvitationEmail = ({
+    candidateName,
+    roleApplied,
+    interviewDate,
+    interviewTime,
+    interviewType = 'Google Meet',
+    interviewLink,
+    notes,
+    interviewerName = 'Talent Acquisition & Technical Panel',
+}) => {
+    const currentYear = new Date().getFullYear();
+    const cleanName = candidateName || 'Candidate';
+    const cleanRole = roleApplied || 'Open Position';
+    const safeSubject = `Interview Invitation: ${cleanRole} at Programming Bridge`;
+
+    return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${safeSubject}</title>
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        * { box-sizing: border-box; }
+        .email-bg { background-color: #f1f5f9; }
+        .email-container { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden; max-width: 600px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
+        .header-bg { background: linear-gradient(135deg, #090e17 0%, #111a2e 100%); padding: 28px 32px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .info-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; }
+        .highlight-border { border-left: 4px solid #00E599; }
+        .footer-bg { background-color: #0b0f19; padding: 22px 28px; text-align: center; border-top: 1px solid #1e293b; }
+        @media (prefers-color-scheme: dark) {
+            .email-bg { background-color: #07090e !important; }
+            .email-container { background-color: #0f172a !important; border-color: #1e293b !important; }
+            .info-card { background-color: #141e33 !important; border-color: #1e293b !important; color: #cbd5e1 !important; }
+            .text-main { color: #f8fafc !important; }
+            .text-muted { color: #94a3b8 !important; }
+        }
+    </style>
+</head>
+<body class="email-bg" style="margin: 0; padding: 24px 10px; background-color: #f1f5f9;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td align="center">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="email-container" style="max-width: 600px; width: 100%; border-radius: 18px; overflow: hidden; background-color: #ffffff;">
+                    <!-- TOP GLOW ACCENT BAR -->
+                    <tr>
+                        <td height="4" style="background: linear-gradient(90deg, #00E599 0%, #38bdf8 50%, #00E599 100%); line-height: 4px; font-size: 4px;">&nbsp;</td>
+                    </tr>
+                    <!-- HEADER -->
+                    <tr>
+                        <td class="header-bg" style="background: linear-gradient(135deg, #090e17 0%, #111a2e 100%); padding: 28px 32px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 22px; font-weight: 900; color: #ffffff;">Programming <span style="color: #00E599;">Bridge</span></div>
+                                        <div style="font-size: 10px; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 1.4px; margin-top: 3px;">Talent Acquisition & Careers</div>
+                                    </td>
+                                    <td align="right">
+                                        <span style="display: inline-block; padding: 5px 12px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; background-color: rgba(0, 229, 153, 0.15); border: 1px solid rgba(0, 229, 153, 0.35); color: #00E599;">
+                                            🎯 Interview Invitation
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- BODY -->
+                    <tr>
+                        <td style="padding: 32px 32px 24px 32px;">
+                            <div style="margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #00E599;">Application Status Update</span>
+                                <h2 style="margin: 4px 0 0 0; font-size: 18px; font-weight: 800; color: #0f172a;" class="text-main">
+                                    Invitation for Interview: ${cleanRole}
+                                </h2>
+                            </div>
+
+                            <p style="font-size: 15px; line-height: 1.7; color: #334155;" class="text-main">
+                                Dear <strong>${cleanName}</strong>,
+                            </p>
+                            <p style="font-size: 14px; line-height: 1.7; color: #334155;" class="text-main">
+                                Thank you for applying for the <strong>${cleanRole}</strong> position at <strong>Programming Bridge</strong>. Following a thorough review of your resume and background, we were impressed by your profile and would love to invite you for an official video interview session.
+                            </p>
+
+                            <!-- INTERVIEW DETAILS CARD -->
+                            <div style="margin: 24px 0;">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="info-card highlight-border" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px;">
+                                    <tr>
+                                        <td>
+                                            <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #00E599; margin-bottom: 12px;">
+                                                📅 Scheduled Interview Details
+                                            </div>
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; line-height: 1.8;">
+                                                <tr>
+                                                    <td width="35%" style="color: #64748b; font-weight: 600;">🗓️ Date:</td>
+                                                    <td style="color: #0f172a; font-weight: 800;" class="text-main">${interviewDate || 'To be mutually confirmed'}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #64748b; font-weight: 600;">⏰ Time:</td>
+                                                    <td style="color: #0f172a; font-weight: 800;" class="text-main">${interviewTime || 'As per calendar invitation'}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="color: #64748b; font-weight: 600;">📹 Platform / Mode:</td>
+                                                    <td style="color: #0f172a; font-weight: 800;" class="text-main">${interviewType}</td>
+                                                </tr>
+                                                ${interviewerName ? `
+                                                <tr>
+                                                    <td style="color: #64748b; font-weight: 600;">👥 Interviewer:</td>
+                                                    <td style="color: #0f172a; font-weight: 700;" class="text-main">${interviewerName}</td>
+                                                </tr>` : ''}
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            ${interviewLink ? `
+                            <!-- JOIN BUTTON -->
+                            <div style="text-align: center; margin: 26px 0;">
+                                <a href="${interviewLink}" target="_blank" style="display: inline-block; padding: 13px 30px; font-size: 13px; font-weight: 800; color: #090e17; text-decoration: none; letter-spacing: 0.4px; text-transform: uppercase; border-radius: 12px; background: linear-gradient(135deg, #00E599 0%, #00B377 100%); box-shadow: 0 4px 14px rgba(0, 229, 153, 0.35);">
+                                    🚀 Join Video Interview
+                                </a>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 8px;">Meeting Link: <a href="${interviewLink}" style="color: #00E599;">${interviewLink}</a></div>
+                            </div>
+                            ` : ''}
+
+                            ${notes ? `
+                            <div style="margin: 20px 0; padding: 14px; background-color: #f1f5f9; border-radius: 10px; font-size: 13px; line-height: 1.6; color: #334155; border-left: 3px solid #38bdf8;" class="info-card">
+                                <strong>💡 Preparation & Instructions:</strong><br/>
+                                ${notes.replace(/\n/g, '<br/>')}
+                            </div>
+                            ` : ''}
+
+                            <div style="font-size: 13px; line-height: 1.6; color: #475569; margin-top: 20px;" class="text-muted">
+                                📌 <strong>Interview Checklist:</strong>
+                                <ul style="margin: 6px 0 0 0; padding-left: 20px;">
+                                    <li>Please join from a quiet environment with a stable internet connection.</li>
+                                    <li>Have your webcam and microphone ready and tested.</li>
+                                    <li>If this is a technical round, please have your preferred IDE/code editor ready.</li>
+                                </ul>
+                            </div>
+
+                            <p style="font-size: 14px; line-height: 1.6; color: #334155; margin-top: 22px;" class="text-main">
+                                If you need to reschedule or have any prior questions, please reply directly to this email at least 24 hours in advance.
+                            </p>
+
+                            <!-- SIGNATURE -->
+                            <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid rgba(148, 163, 184, 0.2); font-size: 13px;">
+                                <div style="color: #64748b; font-weight: 600;">Warm regards,</div>
+                                <div style="font-size: 15px; font-weight: 900; color: #0f172a; margin-top: 2px;" class="text-main">
+                                    Talent Acquisition & HR Team
+                                </div>
+                                <div style="color: #64748b; font-size: 12px; margin-top: 1px;">Programming Bridge</div>
+                                <div style="margin-top: 5px; font-size: 12px;">
+                                    <a href="mailto:official@programmingbridge.org" style="color: #00E599; font-weight: 700;">official@programmingbridge.org</a>
+                                    <span style="color: #94a3b8; margin: 0 6px;">•</span>
+                                    <a href="https://programmingbridge.org" target="_blank" style="color: #38bdf8; font-weight: 700;">programmingbridge.org</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- FOOTER -->
+                    <tr>
+                        <td class="footer-bg" style="background-color: #0b0f19; padding: 20px 24px; text-align: center;">
+                            <p style="margin: 0; font-size: 11px; color: #94a3b8; font-weight: 600;">
+                                &copy; ${currentYear} <strong style="color: #f8fafc;">Programming Bridge</strong>. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+
+/**
+ * Generates an ultra-polite, professional, encouraging candidate rejection email
+ */
+const generateRejectionEmail = ({ candidateName, roleApplied }) => {
+    const currentYear = new Date().getFullYear();
+    const cleanName = candidateName || 'Candidate';
+    const cleanRole = roleApplied || 'Position';
+    const safeSubject = `Update regarding your application for ${cleanRole} - Programming Bridge`;
+
+    return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${safeSubject}</title>
+    <style>
+        html, body { margin: 0 !important; padding: 0 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        * { box-sizing: border-box; }
+        .email-bg { background-color: #f1f5f9; }
+        .email-container { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden; max-width: 600px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
+        .header-bg { background: linear-gradient(135deg, #090e17 0%, #111a2e 100%); padding: 28px 32px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .info-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; }
+        .footer-bg { background-color: #0b0f19; padding: 22px 28px; text-align: center; border-top: 1px solid #1e293b; }
+        @media (prefers-color-scheme: dark) {
+            .email-bg { background-color: #07090e !important; }
+            .email-container { background-color: #0f172a !important; border-color: #1e293b !important; }
+            .info-card { background-color: #141e33 !important; border-color: #1e293b !important; color: #cbd5e1 !important; }
+            .text-main { color: #f8fafc !important; }
+            .text-muted { color: #94a3b8 !important; }
+        }
+    </style>
+</head>
+<body class="email-bg" style="margin: 0; padding: 24px 10px; background-color: #f1f5f9;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td align="center">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="email-container" style="max-width: 600px; width: 100%; border-radius: 18px; overflow: hidden; background-color: #ffffff;">
+                    <!-- TOP ACCENT BAR -->
+                    <tr>
+                        <td height="4" style="background: linear-gradient(90deg, #64748b 0%, #00E599 50%, #64748b 100%); line-height: 4px; font-size: 4px;">&nbsp;</td>
+                    </tr>
+                    <!-- HEADER -->
+                    <tr>
+                        <td class="header-bg" style="background: linear-gradient(135deg, #090e17 0%, #111a2e 100%); padding: 28px 32px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 22px; font-weight: 900; color: #ffffff;">Programming <span style="color: #00E599;">Bridge</span></div>
+                                        <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.4px; margin-top: 3px;">Talent Acquisition & Careers</div>
+                                    </td>
+                                    <td align="right">
+                                        <span style="display: inline-block; padding: 5px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; background-color: rgba(148, 163, 184, 0.15); border: 1px solid rgba(148, 163, 184, 0.3); color: #94a3b8;">
+                                            Application Update
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- BODY -->
+                    <tr>
+                        <td style="padding: 32px 32px 24px 32px;">
+                            <div style="margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b;">Recruitment Decision</span>
+                                <h2 style="margin: 4px 0 0 0; font-size: 17px; font-weight: 800; color: #0f172a;" class="text-main">
+                                    Application for ${cleanRole}
+                                </h2>
+                            </div>
+
+                            <p style="font-size: 15px; line-height: 1.7; color: #334155;" class="text-main">
+                                Dear <strong>${cleanName}</strong>,
+                            </p>
+                            <p style="font-size: 14px; line-height: 1.7; color: #334155;" class="text-main">
+                                Thank you for taking the time to apply for the <strong>${cleanRole}</strong> position at Programming Bridge. We sincerely appreciate your interest in joining our engineering team and the effort you invested in sharing your profile with us.
+                            </p>
+                            <p style="font-size: 14px; line-height: 1.7; color: #334155;" class="text-main">
+                                We received a substantial number of outstanding applications for this opening. After careful consideration and review against our current project specifications, we have decided to move forward with other candidates whose skill sets more closely align with the immediate requirements of this specific role.
+                            </p>
+
+                            <!-- ENCOURAGING NOTE CARD -->
+                            <div style="margin: 22px 0;">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="info-card" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                                    <tr>
+                                        <td>
+                                            <div style="font-size: 12px; font-weight: 800; color: #00E599; margin-bottom: 4px;">🤝 Retained in Active Talent Pool</div>
+                                            <div style="font-size: 13px; line-height: 1.6; color: #64748b;" class="text-muted">
+                                                We were very impressed by your qualifications and have retained your resume in our talent network. Should a future opening matching your expertise become available, our recruitment team will reach out directly.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <p style="font-size: 14px; line-height: 1.7; color: #334155;" class="text-main">
+                                We wish you every success in your ongoing career endeavors and future professional pursuits.
+                            </p>
+
+                            <!-- SIGNATURE -->
+                            <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid rgba(148, 163, 184, 0.2); font-size: 13px;">
+                                <div style="color: #64748b; font-weight: 600;">Sincerely,</div>
+                                <div style="font-size: 15px; font-weight: 900; color: #0f172a; margin-top: 2px;" class="text-main">
+                                    Talent Acquisition & HR Team
+                                </div>
+                                <div style="color: #64748b; font-size: 12px; margin-top: 1px;">Programming Bridge</div>
+                                <div style="margin-top: 5px; font-size: 12px;">
+                                    <a href="mailto:official@programmingbridge.org" style="color: #00E599; font-weight: 700;">official@programmingbridge.org</a>
+                                    <span style="color: #94a3b8; margin: 0 6px;">•</span>
+                                    <a href="https://programmingbridge.org" target="_blank" style="color: #38bdf8; font-weight: 700;">programmingbridge.org</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- FOOTER -->
+                    <tr>
+                        <td class="footer-bg" style="background-color: #0b0f19; padding: 20px 24px; text-align: center;">
+                            <p style="margin: 0; font-size: 11px; color: #94a3b8; font-weight: 600;">
+                                &copy; ${currentYear} <strong style="color: #f8fafc;">Programming Bridge</strong>. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+
+/**
  * Send an email from official@programmingbridge.org via Zoho Mail SMTP
  */
-const sendMailFromZoho = async ({ to, subject, message, html, replyTo, clientName }) => {
+const sendMailFromZoho = async ({
+    to,
+    subject,
+    message,
+    html,
+    replyTo,
+    clientName,
+    fromName = 'Programming Bridge',
+    isHR = false,
+}) => {
     const transporter = getZohoTransporter();
     const fromAddress = process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org';
+
+    const senderDisplayName = isHR ? 'Programming Bridge Talent & HR Team' : fromName;
+    const defaultReplyTo = isHR ? (process.env.HR_EMAIL || 'official@programmingbridge.org') : fromAddress;
 
     const htmlContent = html || generateEmailTemplate({ subject, message, clientName });
 
     const mailOptions = {
-        from: `"Programming Bridge" <${fromAddress}>`,
+        from: `"${senderDisplayName}" <${fromAddress}>`,
         to,
-        replyTo: replyTo || fromAddress,
+        replyTo: replyTo || defaultReplyTo,
         subject,
         text: message || subject,
         html: htmlContent,
@@ -449,5 +768,7 @@ module.exports = {
     getZohoTransporter,
     sendMailFromZoho,
     generateEmailTemplate,
+    generateInterviewInvitationEmail,
+    generateRejectionEmail,
     formatBodyContent,
 };

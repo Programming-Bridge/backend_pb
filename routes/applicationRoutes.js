@@ -6,6 +6,8 @@ const {
     getAllApplications,
     getApplicationById,
     updateApplicationStatus,
+    inviteToInterview,
+    sendCandidateRejectionEmail,
     deleteApplication,
 } = require('../controller/application.controller');
 
@@ -24,6 +26,13 @@ applicationRoutes.get('/:id', verifyToken, isAdmin, getApplicationById);
 
 // PUT update status (Protected: Admin Only)
 applicationRoutes.put('/:id', verifyToken, isAdmin, updateApplicationStatus);
+applicationRoutes.patch('/:id/status', verifyToken, isAdmin, updateApplicationStatus);
+
+// POST schedule/send interview invitation email (Protected: Admin Only)
+applicationRoutes.post('/:id/invite-interview', verifyToken, isAdmin, inviteToInterview);
+
+// POST send rejection email (Protected: Admin Only)
+applicationRoutes.post('/:id/send-rejection', verifyToken, isAdmin, sendCandidateRejectionEmail);
 
 // DELETE application (Protected: Admin Only)
 applicationRoutes.delete('/:id', verifyToken, isAdmin, deleteApplication);
