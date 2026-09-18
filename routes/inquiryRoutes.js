@@ -7,15 +7,16 @@ const {
     getInquiryById,
     updateInquiryStatus,
     deleteInquiry,
+    sendClientEmail,
 } = require('../controller/inquiry.controller');
 
 const {
     createInquiryRules,
     updateInquiryStatusRules,
     inquiryIdParamRules,
+    sendEmailRules,
 } = require('../validations/inquiry.validation');
 
-const { uploadResume } = require('../middlewares/upload.middleware');
 const validate = require('../middlewares/validate.middleware');
 const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
 
@@ -32,6 +33,16 @@ inquiryRoutes.post(
     createInquiryRules,
     validate,
     createInquiry
+);
+
+// POST send direct email / proposal to a client (Protected: Admin Only)
+inquiryRoutes.post(
+    '/send-client-email',
+    verifyToken,
+    isAdmin,
+    sendEmailRules,
+    validate,
+    sendClientEmail
 );
 
 // GET all inquiries (Protected: Admin Only)
@@ -63,3 +74,4 @@ inquiryRoutes.put(
 inquiryRoutes.delete('/:id', verifyToken, isAdmin, inquiryIdParamRules, validate, deleteInquiry);
 
 module.exports = inquiryRoutes;
+

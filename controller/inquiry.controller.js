@@ -1,38 +1,28 @@
 const Inquiry = require('../model/inquiry.model');
-const nodemailer = require('nodemailer');
+const { sendMailFromZoho } = require('../utils/mailer.util');
 
 const sendEmailNotification = async (inquiry) => {
-    const user = process.env.GMAIL_ACCOUNT;
-    const pass = process.env.GMAIL_PASSWORD;
-
-    if (!user || !pass) {
-        return;
-    }
-
     try {
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: { user, pass },
-        });
-
-        const recipient = process.env.NOTIFICATION_EMAIL || user;
-
-        await transporter.sendMail({
-            from: `"Website Inquiry" <${user}>`,
-            to: recipient,
-            subject: `🔔 New Inquiry from ${inquiry.name} (${inquiry.projectType})`,
-            html: `
-                <h2>New Project Inquiry Received</h2>
+        const recipient = process.env.NOTIFICATION_EMAIL || process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org';
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px; border: 1px solid #334155; border-radius: 10px; background-color: #0f172a; color: #f8fafc;">
+                <h2 style="color: #00E599; border-bottom: 2px solid #00E599; padding-bottom: 8px;">🔔 New Project Inquiry Received</h2>
                 <p><strong>Name:</strong> ${inquiry.name}</p>
-                <p><strong>Email:</strong> ${inquiry.email}</p>
+                <p><strong>Email:</strong> <a href="mailto:${inquiry.email}" style="color: #38bdf8;">${inquiry.email}</a></p>
                 <p><strong>Project Type:</strong> ${inquiry.projectType}</p>
                 <p><strong>Budget Range:</strong> ${inquiry.budgetRange}</p>
                 ${inquiry.phone ? `<p><strong>Phone:</strong> ${inquiry.phone}</p>` : ''}
                 ${inquiry.company ? `<p><strong>Company:</strong> ${inquiry.company}</p>` : ''}
-                <hr />
+                <hr style="border-color: #334155;" />
                 <p><strong>Message:</strong></p>
-                <p>${inquiry.message.replace(/\n/g, '<br/>')}</p>
-            `,
+                <p style="background-color: #1e293b; padding: 12px; border-radius: 6px; color: #cbd5e1;">${inquiry.message.replace(/\n/g, '<br/>')}</p>
+            </div>
+        `;
+
+        await sendMailFromZoho({
+            to: recipient,
+            subject: `🔔 New Inquiry: ${inquiry.name} (${inquiry.projectType})`,
+            html,
         });
     } catch (err) {
         console.error('Email notification failed (non-critical):', err.message);
@@ -221,3 +211,49 @@ exports.deleteInquiry = async (req, res) => {
         });
     }
 };
+
+// Send direct email / proposal to a client from official@programmingbridge.org
+exports.sendClientEmail = async (req, res) => {
+    try {
+        const { to, subject, message, inquiryId, clientName } = req.body;
+
+        if (!to || !subject || !message) {
+            return res.status(400).json({
+                success: false,
+                message: 'Recipient email, subject, and message are required.',
+            });
+        }
+
+        // Send email via Zoho Mail SMTP
+        await sendMailFromZoho({
+            to,
+            subject,
+            message,
+            clientName,
+        });
+
+        let updatedInquiry = null;
+        // If an inquiryId was provided, update status to 'Contacted' and mark as read
+        if (inquiryId) {
+            updatedInquiry = await Inquiry.findByIdAndUpdate(
+                inquiryId,
+                { status: 'Contacted', isRead: true },
+                { returnDocument: 'after' }
+            );
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: `Email successfully sent to ${to} from official@programmingbridge.org`,
+            data: updatedInquiry || { to, subject },
+        });
+    } catch (error) {
+        console.error('Failed to send email to client:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to send email. Please check Zoho SMTP settings.',
+        });
+    }
+};
+
+

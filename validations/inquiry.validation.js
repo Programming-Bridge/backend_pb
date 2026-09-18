@@ -61,6 +61,28 @@ const updateInquiryStatusRules = [
         .isBoolean().withMessage('isRead must be a boolean (true/false)'),
 ];
 
+// Send Email / Proposal to Client Validation Rules
+const sendEmailRules = [
+    body('to')
+        .trim()
+        .notEmpty().withMessage('Recipient email is required')
+        .isEmail().withMessage('Please provide a valid recipient email address'),
+
+    body('subject')
+        .trim()
+        .notEmpty().withMessage('Subject is required')
+        .isLength({ min: 2, max: 200 }).withMessage('Subject must be between 2 and 200 characters'),
+
+    body('message')
+        .trim()
+        .notEmpty().withMessage('Message body is required')
+        .isLength({ min: 5, max: 10000 }).withMessage('Message must be between 5 and 10000 characters'),
+
+    body('inquiryId')
+        .optional()
+        .isMongoId().withMessage('Invalid Inquiry ID format'),
+];
+
 // Inquiry Mongo ID Validation Rules
 const inquiryIdParamRules = [
     param('id')
@@ -71,4 +93,8 @@ module.exports = {
     createInquiryRules,
     updateInquiryStatusRules,
     inquiryIdParamRules,
+    sendEmailRules,
 };
+
+
+
