@@ -160,6 +160,11 @@ This API serves the **Programming Bridge Frontend Application**:
 
 ## 📋 Changelog
 
+### v1.0.1 — Zoho HR Mailer Transporter & Inbound Career Alerts
+- **Zoho HR Transporter Authentication**: Updated `mailer.util.js` with dual SMTP transporters (`official@` and `hr@programmingbridge.org`) with automatic switching when `isHR: true`.
+- **Candidate Email Signatures & Reply-To**: All recruitment dispatches (interview invites, application rejections) now originate from `hr@programmingbridge.org`.
+- **Inbound Application Notifications**: New applicant submissions automatically trigger alert dispatches to the HR mailbox (`hr@programmingbridge.org`).
+
 ### v0.2.1 — Input Validation & Phone Sanitization
 - **Phone Number Validation**: Enhanced express-validator rules for inquiry and job applications to support international phone characters (`+`, digits, hyphens, spaces, parens) with minimum character requirements.
 - **Inquiry Payload Sanitization**: Added support for flexible budget ranges and project types.
