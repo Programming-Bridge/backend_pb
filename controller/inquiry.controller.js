@@ -212,10 +212,10 @@ exports.deleteInquiry = async (req, res) => {
     }
 };
 
-// Send direct email / proposal to a client from official@programmingbridge.org
+// Send direct email / proposal to a client (defaults to Hasnain's Zoho account)
 exports.sendClientEmail = async (req, res) => {
     try {
-        const { to, subject, message, inquiryId, clientName } = req.body;
+        const { to, subject, message, inquiryId, clientName, senderAccount = 'hasnain' } = req.body;
 
         if (!to || !subject || !message) {
             return res.status(400).json({
@@ -224,12 +224,13 @@ exports.sendClientEmail = async (req, res) => {
             });
         }
 
-        // Send email via Zoho Mail SMTP
+        // Send email via Zoho Mail SMTP from Hasnain's account (or requested account)
         await sendMailFromZoho({
             to,
             subject,
             message,
             clientName,
+            accountType: senderAccount,
         });
 
         let updatedInquiry = null;
@@ -242,9 +243,13 @@ exports.sendClientEmail = async (req, res) => {
             );
         }
 
+        const senderEmail = senderAccount === 'hasnain' 
+            ? (process.env.HASNAIN_ZOHO_MAIL_USER || 'hasnain@programmingbridge.org')
+            : (senderAccount === 'hr' ? 'hr@programmingbridge.org' : 'official@programmingbridge.org');
+
         return res.status(200).json({
             success: true,
-            message: `Email successfully sent to ${to} from official@programmingbridge.org`,
+            message: `Proposal / Email successfully sent to ${to} from ${senderEmail}`,
             data: updatedInquiry || { to, subject },
         });
     } catch (error) {

@@ -1,17 +1,29 @@
 const nodemailer = require('nodemailer');
 
-const getZohoTransporter = (isHR = false) => {
-    const user = (isHR && process.env.HR_ZOHO_MAIL_USER)
-        ? process.env.HR_ZOHO_MAIL_USER
-        : (process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org');
-    const pass = (isHR && process.env.HR_ZOHO_MAIL_PASS)
-        ? process.env.HR_ZOHO_MAIL_PASS
-        : process.env.ZOHO_MAIL_PASS;
+const getZohoTransporter = (accountType = 'hasnain') => {
+    let account = accountType;
+    if (typeof accountType === 'boolean') {
+        account = accountType ? 'hr' : 'official';
+    }
+
+    let user, pass;
+    if (account === 'hr') {
+        user = process.env.HR_ZOHO_MAIL_USER || 'hr@programmingbridge.org';
+        pass = process.env.HR_ZOHO_MAIL_PASS;
+    } else if (account === 'official') {
+        user = process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org';
+        pass = process.env.ZOHO_MAIL_PASS;
+    } else {
+        // default to Hasnain's Zoho account
+        user = process.env.HASNAIN_ZOHO_MAIL_USER || 'hasnain@programmingbridge.org';
+        pass = process.env.HASNAIN_ZOHO_MAIL_PASS;
+    }
+
     const host = process.env.SMTP_HOST || 'smtp.zoho.com';
     const port = Number(process.env.SMTP_PORT) || 465;
 
     if (!pass) {
-        throw new Error(`${isHR ? 'HR_ZOHO_MAIL_PASS or ' : ''}ZOHO_MAIL_PASS is not configured in .env`);
+        throw new Error(`Zoho Mail Password for account '${account}' (${user}) is not configured in .env`);
     }
 
     return nodemailer.createTransport({
@@ -80,7 +92,14 @@ const formatBodyContent = (text) => {
 /**
  * Generates an ultra-premium, 100% Mobile Responsive, Dark & Light mode adaptive HTML email template
  */
-const generateEmailTemplate = ({ subject, message, clientName = 'Valued Client' }) => {
+const generateEmailTemplate = ({
+    subject,
+    message,
+    clientName = 'Valued Client',
+    senderName = 'Hasnain Iqbal',
+    senderRole = 'Founder & Lead Software Architect',
+    senderEmail = 'hasnain@programmingbridge.org',
+}) => {
     const formattedContent = formatBodyContent(message);
     const safeSubject = subject || 'Project Proposal & Technical Consultation';
     const currentYear = new Date().getFullYear();
@@ -363,7 +382,7 @@ const generateEmailTemplate = ({ subject, message, clientName = 'Valued Client' 
                                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="cta-btn-wrap">
                                             <tr>
                                                 <td align="center" style="border-radius: 12px; background: linear-gradient(135deg, #00E599 0%, #00B377 100%); box-shadow: 0 4px 14px rgba(0, 229, 153, 0.35);">
-                                                    <a href="mailto:official@programmingbridge.org?subject=${encodeURIComponent(`Re: ${safeSubject}`)}" target="_blank" class="cta-btn" style="display: inline-block; padding: 13px 26px; font-size: 13px; font-weight: 800; color: #090e17; text-decoration: none; letter-spacing: 0.3px; text-transform: uppercase;">
+                                                    <a href="mailto:${senderEmail}?subject=${encodeURIComponent(`Re: ${safeSubject}`)}" target="_blank" class="cta-btn" style="display: inline-block; padding: 13px 26px; font-size: 13px; font-weight: 800; color: #090e17; text-decoration: none; letter-spacing: 0.3px; text-transform: uppercase;">
                                                         ✉️ Reply Directly to This Email
                                                     </a>
                                                 </td>
@@ -377,22 +396,33 @@ const generateEmailTemplate = ({ subject, message, clientName = 'Valued Client' 
                             </table>
 
                             <!-- EXECUTIVE SIGNATURE -->
-                            <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(148, 163, 184, 0.2);">
+                            <div style="margin-top: 32px; padding-top: 22px; border-top: 1px solid rgba(148, 163, 184, 0.2);">
                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%;">
                                     <tr>
                                         <td style="vertical-align: top;">
                                             <div class="text-muted" style="font-size: 12px; font-weight: 600;">Best regards,</div>
-                                            <div class="text-title" style="font-size: 15px; font-weight: 900; margin-top: 2px;">
-                                                Programming Bridge <span style="color: #00E599;">Team</span>
+                                            <div class="text-title" style="font-size: 16px; font-weight: 900; margin-top: 3px;">
+                                                ${senderName}
                                             </div>
-                                            <div class="text-muted" style="font-size: 12px; font-weight: 600; margin-top: 1px;">
-                                                Engineering & Client Advisory Department
+                                            <div class="text-muted" style="font-size: 12px; font-weight: 600; margin-top: 2px;">
+                                                ${senderRole} • <span style="color: #00E599; font-weight: 700;">Programming Bridge</span>
                                             </div>
-                                            <div style="margin-top: 6px; font-size: 12px;">
-                                                <a href="mailto:official@programmingbridge.org" style="color: #00E599; font-weight: 700;">official@programmingbridge.org</a>
-                                                <span class="text-muted" style="margin: 0 6px;">•</span>
-                                                <a href="https://programmingbridge.org" target="_blank" style="color: #38bdf8; font-weight: 700;">programmingbridge.org</a>
-                                            </div>
+                                            
+                                            <!-- Clear Contact & Website Section -->
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-top: 10px; border-collapse: separate; border-spacing: 0;">
+                                                <tr>
+                                                    <td style="padding: 3px 0; font-size: 12px;">
+                                                        <span style="color: #94a3b8; font-weight: 600; margin-right: 6px;">✉️ Direct Email:</span>
+                                                        <a href="mailto:${senderEmail}" style="color: #00E599; font-weight: 700; text-decoration: none;">${senderEmail}</a>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 3px 0; font-size: 12px;">
+                                                        <span style="color: #94a3b8; font-weight: 600; margin-right: 6px;">🌐 Official Website:</span>
+                                                        <a href="https://programmingbridge.org" target="_blank" style="color: #38bdf8; font-weight: 700; text-decoration: underline;">https://programmingbridge.org</a>
+                                                    </td>
+                                                </tr>
+                                            </table>
                                         </td>
                                     </tr>
                                 </table>
@@ -735,7 +765,7 @@ const generateRejectionEmail = ({ candidateName, roleApplied }) => {
 };
 
 /**
- * Send an email via Zoho Mail SMTP (Supports Official & HR accounts)
+ * Send an email via Zoho Mail SMTP (Supports Hasnain, Official & HR accounts)
  */
 const sendMailFromZoho = async ({
     to,
@@ -744,20 +774,47 @@ const sendMailFromZoho = async ({
     html,
     replyTo,
     clientName,
-    fromName = 'Programming Bridge',
+    fromName,
+    accountType = 'hasnain',
     isHR = false,
 }) => {
-    const transporter = getZohoTransporter(isHR);
-    const hrAddress = process.env.HR_ZOHO_MAIL_USER || 'hr@programmingbridge.org';
-    const officialAddress = process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org';
-    const fromAddress = isHR ? hrAddress : officialAddress;
+    let account = accountType;
+    if (isHR) {
+        account = 'hr';
+    }
 
-    const senderDisplayName = isHR 
-        ? (fromName && fromName !== 'Programming Bridge' ? fromName : 'Programming Bridge HR & Talent Team') 
-        : fromName;
-    const defaultReplyTo = isHR ? hrAddress : officialAddress;
+    const transporter = getZohoTransporter(account);
 
-    const htmlContent = html || generateEmailTemplate({ subject, message, clientName });
+    let fromAddress;
+    let defaultFromName;
+    let defaultRole;
+
+    if (account === 'hr') {
+        fromAddress = process.env.HR_ZOHO_MAIL_USER || 'hr@programmingbridge.org';
+        defaultFromName = 'Programming Bridge HR & Talent Team';
+        defaultRole = 'Talent Acquisition & HR Department';
+    } else if (account === 'official') {
+        fromAddress = process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org';
+        defaultFromName = 'Programming Bridge Team';
+        defaultRole = 'Engineering & Client Advisory Department';
+    } else {
+        // default to Hasnain
+        fromAddress = process.env.HASNAIN_ZOHO_MAIL_USER || 'hasnain@programmingbridge.org';
+        defaultFromName = 'Hasnain Iqbal | Programming Bridge';
+        defaultRole = 'Founder & Lead Software Architect';
+    }
+
+    const senderDisplayName = fromName || defaultFromName;
+    const defaultReplyTo = fromAddress;
+
+    const htmlContent = html || generateEmailTemplate({
+        subject,
+        message,
+        clientName,
+        senderName: account === 'hasnain' ? 'Hasnain Iqbal' : (fromName || 'Programming Bridge Team'),
+        senderRole: defaultRole,
+        senderEmail: fromAddress,
+    });
 
     const mailOptions = {
         from: `"${senderDisplayName}" <${fromAddress}>`,
