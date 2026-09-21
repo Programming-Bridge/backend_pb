@@ -1,13 +1,17 @@
 const nodemailer = require('nodemailer');
 
-const getZohoTransporter = () => {
-    const user = process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org';
-    const pass = process.env.ZOHO_MAIL_PASS;
+const getZohoTransporter = (isHR = false) => {
+    const user = (isHR && process.env.HR_ZOHO_MAIL_USER)
+        ? process.env.HR_ZOHO_MAIL_USER
+        : (process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org');
+    const pass = (isHR && process.env.HR_ZOHO_MAIL_PASS)
+        ? process.env.HR_ZOHO_MAIL_PASS
+        : process.env.ZOHO_MAIL_PASS;
     const host = process.env.SMTP_HOST || 'smtp.zoho.com';
     const port = Number(process.env.SMTP_PORT) || 465;
 
     if (!pass) {
-        throw new Error('ZOHO_MAIL_PASS is not configured in .env');
+        throw new Error(`${isHR ? 'HR_ZOHO_MAIL_PASS or ' : ''}ZOHO_MAIL_PASS is not configured in .env`);
     }
 
     return nodemailer.createTransport({
@@ -579,7 +583,7 @@ const generateInterviewInvitationEmail = ({
                                 </div>
                                 <div style="color: #64748b; font-size: 12px; margin-top: 1px;">Programming Bridge</div>
                                 <div style="margin-top: 5px; font-size: 12px;">
-                                    <a href="mailto:official@programmingbridge.org" style="color: #00E599; font-weight: 700;">official@programmingbridge.org</a>
+                                    <a href="mailto:hr@programmingbridge.org" style="color: #00E599; font-weight: 700;">hr@programmingbridge.org</a>
                                     <span style="color: #94a3b8; margin: 0 6px;">•</span>
                                     <a href="https://programmingbridge.org" target="_blank" style="color: #38bdf8; font-weight: 700;">programmingbridge.org</a>
                                 </div>
@@ -707,7 +711,7 @@ const generateRejectionEmail = ({ candidateName, roleApplied }) => {
                                 </div>
                                 <div style="color: #64748b; font-size: 12px; margin-top: 1px;">Programming Bridge</div>
                                 <div style="margin-top: 5px; font-size: 12px;">
-                                    <a href="mailto:official@programmingbridge.org" style="color: #00E599; font-weight: 700;">official@programmingbridge.org</a>
+                                    <a href="mailto:hr@programmingbridge.org" style="color: #00E599; font-weight: 700;">hr@programmingbridge.org</a>
                                     <span style="color: #94a3b8; margin: 0 6px;">•</span>
                                     <a href="https://programmingbridge.org" target="_blank" style="color: #38bdf8; font-weight: 700;">programmingbridge.org</a>
                                 </div>
@@ -731,7 +735,7 @@ const generateRejectionEmail = ({ candidateName, roleApplied }) => {
 };
 
 /**
- * Send an email from official@programmingbridge.org via Zoho Mail SMTP
+ * Send an email via Zoho Mail SMTP (Supports Official & HR accounts)
  */
 const sendMailFromZoho = async ({
     to,
@@ -743,11 +747,15 @@ const sendMailFromZoho = async ({
     fromName = 'Programming Bridge',
     isHR = false,
 }) => {
-    const transporter = getZohoTransporter();
-    const fromAddress = process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org';
+    const transporter = getZohoTransporter(isHR);
+    const hrAddress = process.env.HR_ZOHO_MAIL_USER || 'hr@programmingbridge.org';
+    const officialAddress = process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org';
+    const fromAddress = isHR ? hrAddress : officialAddress;
 
-    const senderDisplayName = isHR ? 'Programming Bridge Talent & HR Team' : fromName;
-    const defaultReplyTo = isHR ? (process.env.HR_EMAIL || 'official@programmingbridge.org') : fromAddress;
+    const senderDisplayName = isHR 
+        ? (fromName && fromName !== 'Programming Bridge' ? fromName : 'Programming Bridge HR & Talent Team') 
+        : fromName;
+    const defaultReplyTo = isHR ? hrAddress : officialAddress;
 
     const htmlContent = html || generateEmailTemplate({ subject, message, clientName });
 

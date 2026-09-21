@@ -8,7 +8,7 @@ const {
 // Send email notification to company official email
 const sendJobApplicationEmail = async (application, fileAttachment = null) => {
     try {
-        const recipient = process.env.NOTIFICATION_EMAIL || process.env.OFFICIAL_EMAIL || process.env.ZOHO_MAIL_USER || 'official@programmingbridge.org';
+        const recipient = process.env.HR_ZOHO_MAIL_USER || process.env.NOTIFICATION_EMAIL || process.env.OFFICIAL_EMAIL || 'hr@programmingbridge.org';
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <h2 style="color: #059669; border-bottom: 2px solid #059669; padding-bottom: 8px;">
